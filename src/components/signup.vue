@@ -1,44 +1,48 @@
 <template>
-	<b-container>
-		<b-row>
-			<b-col>
-			</b-col>
-			<b-col sm="12" md="4">
-				<h1 class="text-center login-title">Jepret GRAM</h1>
-            <div class="account-wall">
-                <img class="profile-img" src="https://lh5.googleusercontent.com/-b0-k99FZlyE/AAAAAAAAAAI/AAAAAAAAAAA/eu7opA4byxI/photo.jpg?sz=120"
-                    alt="">
-                <form class="form-signin">
-                <input type="text" v-model="email" class="form-control" placeholder="Email" required autofocus>
-                <input type="password" v-model="password" class="form-control" placeholder="Password" required>
-                <a @click="login()" class="btn btn-lg btn-primary btn-block" type="submit">
-                    Sign in</a>
-                </form>
-            </div>
-            <a href="/signup" class="text-center new-account">Create an account </a>
-			</b-col>
-			<b-col>
-			</b-col>
-		</b-row>
-	</b-container>
+  <b-container>
+    <b-row>
+      <b-col>
+      </b-col>
+      <b-col sm="12" md="4">
+        <h1 class="text-center login-title">Jepret GRAM</h1>
+        <div class="account-wall">
+          <img class="profile-img" src="https://lh5.googleusercontent.com/-b0-k99FZlyE/AAAAAAAAAAI/AAAAAAAAAAA/eu7opA4byxI/photo.jpg?sz=120" alt="">
+          <form class="form-signin">
+            <input type="text" v-model="name" class="form-control" placeholder="name" required autofocus>
+            <input type="text" v-model="username" class="form-control" placeholder="username" required autofocus>
+            <input type="text" v-model="email" class="form-control" placeholder="Email" required autofocus>
+            <input type="password" v-model="password" class="form-control" placeholder="Password" required>
+            <a @click="signup()" class="btn btn-lg btn-primary btn-block" type="submit">
+              Sign in</a>
+          </form>
+        </div>
+        <a href="#" class="text-center new-account">Back to Login</a>
+      </b-col>
+      <b-col>
+      </b-col>
+    </b-row>
+  </b-container>
 </template>
 
 <script>
 export default {
-  name: "login",
+  name: "signup",
   data() {
     return {
-      email : null,
-      password : null
-
-    }
+      name: null,
+      username: null,
+      email: null,
+      password: null
+    };
   },
-  methods : {
-    login(){
-      this.$store.dispatch("signin", {
-        email : this.email,
-        password : this.password
-      })
+  methods: {
+    signup() {
+      this.$store.dispatch("signup", {
+        name: this.name,
+        username: this.username,
+        email: this.email,
+        password: this.password
+      });
     }
   }
 };

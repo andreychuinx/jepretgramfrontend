@@ -1,29 +1,169 @@
 <template>
   <div>
-    <header>
-    </header>
+    <header-template>
+    </header-template>
+    <div class="container">
+      <div class="row text-center text-lg-left">
+        <div class="col-xl-12 col-md-6 col-xs-6">
+          <div v-for="data in getTimeline" class="col-lg-12 col-md-6 col-xs-6">
+            <div class="header">
+              <span class="prf-pic"><img src="http://image.mp3.zdn.vn/thumb/165_165/avatars/f/3/f3ccdd27d2000e3f9255a7e3e2c48800_1349926257.jpg"></span>
+              <span class="account-name">{{data.userId.username}}</span>
+              <span class="timestamp">{{getDate(data.createdAt)}}</span>
+            </div>
+            <img :src=data.link class="feed-img">
+            <div class="img-footer">
+              <div class="comments">
+                <div class="comments-content">
+                  <span class="comment-name">
+                    <b>{{data.userId.username}}</b>
+                  </span>
+                  <span class="posted-comment">{{data.caption}}</span>
+                  <br>
+                  <div class="col-md-12 float-left">
+                    <div class="float-left text-left">
+                      <icon name="heart" :style="{color : heartColor(data)}" @click.native="methodLike(data)">
 
+                      </icon>
+                      &nbsp {{data.likes.length}} Like
+                    </div>
+                    <div class="float-right text-right" v-if="methodButtonModal(data)">
+                    <b-button size="sm" variant="warning" v-b-modal.modalEdit @click="methodEditModal(data)">
+                      <icon name="edit"></icon>
+                    </b-button>
+                    <b-button size="sm" variant="danger" v-b-modal.modalDelete @click="methodDeleteModal(data)">
+                      <icon name="trash" scale="1" paths.style="fill:#8ED6FB"></icon>
+                    </b-button>
+                  </div>
+                  </div>
+                  <br>
+
+                </div>
+                <div class="comments-field">
+                  <div v-for="comments in data.comments" class="col-md-12">
+                    <span class="comment-name">
+                      <b>{{comments._id.username}}</b>
+                    </span>
+                    <span class="posted-comment">{{comments.comment}}</span><br>
+                  </div>
+
+                  <input v-on:keyup.enter="addComment(data._id)" v-model="comment" type="text" class="text-box" placeholder="Add a comment...">
+                </div>
+              </div>
+            </div>
+
+          </div>
+          <b-modal id="modalDelete" ref="modal" title="Delete Photo?" @ok="handleOk">
+
+          </b-modal>
+          <b-modal id="modalEdit" ref="modal" title="Edit Caption" @ok="handleEditOk">
+            <form @submit.stop.prevent="handleEdit">
+              <b-form-input type="text" v-model="caption"></b-form-input>
+            </form>
+          </b-modal>
+        </div>
+      </div>
+
+    </div>
   </div>
 
-  
-  
 </template>
 
 <script>
-import header from "./header"
+import headerTemplate from "./header";
+import modalDelete from "./modalDelete";
+import { mapActions, mapMutations, mapStates, mapGetters } from "vuex";
+
 export default {
-  name: "home",
+  name: "homePage",
   data() {
-    return {};
+    return {
+      comment: "",
+      showModal: false,
+      dataPhoto: null,
+      caption: ""
+    };
   },
-  components : {
-    header
+  components: {
+    headerTemplate,
+    modalDelete
+  },
+  computed: {
+    ...mapGetters(["getTimeline", "getDate"]),
+    
+  },
+  mounted() {
+    this.$store.dispatch("dataTimeline");
+  },
+  methods: {
+    methodButtonModal(data){
+      let userObject = JSON.parse(localStorage.getItem('user'))
+      if(data.userId._id == userObject.userId){
+        return true
+      }else{
+        return false
+      }
+    },
+    heartColor(data){
+      let userObject = JSON.parse(localStorage.getItem('user'))
+      let findLikeUser = -1
+      if(data.likes.length !== 0){
+        findLikeUser = data.likes.findIndex(likes => likes._id == userObject.userId)
+      }
+      if(findLikeUser >= 0){
+        return 'red'
+      }else{
+        return 'black'
+      }
+    },
+    methodLike(data){
+      let userObject = JSON.parse(localStorage.getItem('user'))
+      if(userObject.userId !== data.userId._id){
+        this.$store.dispatch("like", {
+        data : data
+      })
+      }
+      
+    },
+    addComment(photoId) {
+      this.$store.dispatch("addComment", {
+        photoId: photoId,
+        comment: this.comment
+      });
+      this.comment = "";
+    },
+    methodDeleteModal(data) {
+      this.showModal = true;
+      this.dataPhoto = data;
+    },
+    methodEditModal(data) {
+      this.showModal = true;
+      this.caption = data.caption;
+      this.dataPhoto = data;
+    },
+    handleOk(evt) {
+      this.$store.dispatch("deletePhoto", {
+        id: this.dataPhoto._id
+      });
+      this.dataPhoto = null;
+    },
+    handleEditOk(){
+      this.handleEdit()
+    },
+    handleEdit(){
+      this.$store.dispatch("editPhoto", {
+        id : this.dataPhoto._id,
+        caption : this.caption
+      })
+      this.dataPhoto = null
+      this.caption = ""
+      this.$refs.modal.hide()
+    }
   }
 };
 </script>
+
 <style scoped>
-
-
 a {
   text-decoration: none;
   color: black;
@@ -48,12 +188,6 @@ a {
   float: left;
   width: 200px;
   height: 20px;
-}
-
-#center {
-  display: inline-block;
-  margin: 0 auto;
-  min-width: 600px;
 }
 
 #right {
